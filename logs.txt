@@ -1,2 +1,0 @@
-2022-02-03 12:38:32.337631     updateDatabase() is in the job queue right now!
-2022-02-03 12:38:32.339294     send_dailyMenu() is in the job queue right now!
