@@ -1,5 +1,5 @@
 import os
-import config
+import config, creatingPicture
 import logging
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
@@ -56,23 +56,43 @@ def send_dailyMenu(context: CallbackContext):
     if todaysDate[8] == '0':
         todaysDate = todaysDate[:8] + todaysDate[-1]
 
-    # Fetching the menu as string from database
-    menuText = txt_to_string(todaysDate)
-    log_print(f"{todaysDate}'s menu has been fetched from database")
-
-    context.bot.send_message(chat_id=config.chat_id, text=menuText)
+    # Texts will be printed on background image and then, bot will send it
+    creatingPicture.main(f'dailyMenus/{todaysDate}')
+    log_print("Menu photo has been generated")
+    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
     log_print("Daily menu has been sent!")
+    os.remove('menu.png')
+    log_print("menu.png has been removed from project directory")
+
+
+def send_now(update: Update, context: CallbackContext):
+    user = update.message.from_user
+    user_id = user['id']
+
+    todaysDate = str(datetime.date.today()).replace("-", ".")
+    if todaysDate[8] == '0':
+        todaysDate = todaysDate[:8] + todaysDate[-1]
+
+    creatingPicture.main(f'dailyMenus/{todaysDate}')
+    context.bot.send_message(chat_id=user_id, photo=open('menu.png', 'rb'))
+    log_print(f"Daily menu has been sent to {user_id}!")
+    os.remove('menu.png')
+    
+
+def isOnline(update: Update, context: CallbackContext):
+    context.bot.send_message(chat_id=config.admin_id, text="Yes father, I'm alive :)")
 
 
 def main():
     updater = Updater(config.API_KEY, use_context=True)
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("start", start)),
+    dispatcher.add_handler(CommandHandler("online_status", isOnline))
+    dispatcher.add_handler(CommandHandler("send_now", send_now))
 
     updater.start_polling()
     updater.idle()
-    log_print("Bot has been initialized")
 
 
 if __name__ == '__main__':
