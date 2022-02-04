@@ -74,10 +74,10 @@ def send_now(update: Update, context: CallbackContext):
         todaysDate = todaysDate[:8] + todaysDate[-1]
 
     creatingPicture.main(f'dailyMenus/{todaysDate}')
-    context.bot.send_message(chat_id=user_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=user_id, photo=open('deneme.png', 'rb'))
     log_print(f"Daily menu has been sent to {user_id}!")
-    os.remove('menu.png')
-    
+    os.remove('deneme.png')
+
 
 def isOnline(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=config.admin_id, text="Yes father, I'm alive :)")
