@@ -36,6 +36,8 @@ for dailyComplexData in complexData:
 
         preMenu.append(meal)
 
+    # Identification of 'Sıhhiye' and 'Beytepe' strings.
+    # There are two different campus of Hacettepe University, therefore we should be aware of this situation.
     menu = []
     j = 0
     while j < len(preMenu):
@@ -54,10 +56,8 @@ for dailyComplexData in complexData:
         j += 1
 
     with open(f'dailyMenus/{dateReverser(date)}', 'w') as f:
-        f.writelines(f"{date} - {weekday}\n\n")
         for meal in menu:
             f.writelines(f"{meal}\n")
 
         f.writelines(f"\nKalori: {calorie}")
-
-        print(f"Updated {dateReverser(date)}.txt")
+        print(f"{dateReverser(date)} updated!")
