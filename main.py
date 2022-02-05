@@ -3,8 +3,8 @@ import requests
 
 
 # Renaming file names in order to sort them automatically.
-def dateReverser(date):
-    tempList = date.split(".")
+def dateReverser(txt):
+    tempList = txt.split(".")
     newDate = f"{tempList[2]}.{tempList[1]}.{tempList[0]}"
     return newDate
 
@@ -22,7 +22,7 @@ complexData = soup.find_all(class_="pricing")
 
 for dailyComplexData in complexData:
     temp = dailyComplexData.get_text(separator='\n').split('\n')
-    date, weekday = temp[0].split()[1], temp[0].split()[2]
+    date = temp[0].split()[1]
     # print(temp)
 
     preMenu = []
@@ -55,6 +55,7 @@ for dailyComplexData in complexData:
 
         j += 1
 
+    # Writing menu into the text files, for now our database consists of .txt files.
     with open(f'dailyMenus/{dateReverser(date)}', 'w') as f:
         for meal in menu:
             f.writelines(f"{meal}\n")
