@@ -24,19 +24,18 @@ def main(txtFile):
     dailySets = ((pinkBackground, blueColor), (blueBackground, blueColor), (greenBackground, blueColor), (yellowBackground, blueColor),
                  (pinkBackground, blackColor), (blueBackground, blackColor), (greenBackground, blackColor), (yellowBackground, blackColor))
 
-    # Background image and font
+    # Choosing background image and font color
     todaysBackground = dailySets[day][0]
+    todaysColor = dailySets[day][1]
 
     img = Image.open(todaysBackground)
-    font = ImageFont.truetype('resources/fonts/UbuntuCondensed-Regular.ttf', 60)
+    font = ImageFont.truetype('resources/fonts/UbuntuCondensed-Regular.ttf', 50)
     titeFont = ImageFont.truetype('resources/fonts/Courgette-Regular.ttf', 60)
-
-    # Placing texts into background image
-    todaysColor = dailySets[day][1]
 
     menu = ImageDraw.Draw(img)
     menu.text((315,50), '~Günün Menüsü~', font=titeFont, fill=todaysColor)
 
+    # One by one placing meals into the menu picture
     y = 220
     calorie = None
     for line in menuTxt:
@@ -47,10 +46,13 @@ def main(txtFile):
             calorie = line.split()[1]
             break
 
-        menu.text((75, y), text='•'+line, font=font, fill=todaysColor)
+        menu.text((75, y), text='• '+line, font=font, fill=todaysColor)
         y += 150
 
 
     menu.text((75,1130), text=f'Toplam: {calorie} cal', font=font, fill=redColor)
 
-    img.save('deneme.png')
+    img.save('menu.png')
+
+
+main('dailyMenus/2022.02.28')
