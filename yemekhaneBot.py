@@ -1,9 +1,12 @@
-import os
-import config, creatingPicture
+import datetime
 import logging
+import os
+
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
-import datetime
+
+import config
+import creatingPicture
 
 # Enable logging
 logging.basicConfig(
@@ -13,6 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# Logging into text file for debugging while testing something.
 def log_print(text):
     with open('logs.txt', 'a') as logFile:
         logFile.writelines(f"{datetime.datetime.now()}     {text}\n")
@@ -22,16 +26,6 @@ def dateReverser(date):
     tempList = date.split(".")
     newDate = f"{tempList[2]}.{tempList[1]}.{tempList[0]}"
     return newDate
-
-
-def txt_to_string(date):
-    menuText = ""
-    f = open(f'dailyMenus/{date}', 'r').readlines()
-
-    for line in f:
-        menuText += f"{line}"
-
-    return menuText
 
 
 def start(update: Update, context: CallbackContext):
@@ -61,8 +55,6 @@ def send_dailyMenu(context: CallbackContext):
     log_print("Menu photo has been generated")
     context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
     log_print("Daily menu has been sent!")
-    os.remove('menu.png')
-    log_print("menu.png has been removed from project directory")
 
 
 def send_now(update: Update, context: CallbackContext):
@@ -74,13 +66,12 @@ def send_now(update: Update, context: CallbackContext):
         todaysDate = todaysDate[:8] + todaysDate[-1]
 
     creatingPicture.main(f'dailyMenus/{todaysDate}')
-    context.bot.send_photo(chat_id=user_id, photo=open('deneme.png', 'rb'))
+    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
     log_print(f"Daily menu has been sent to {user_id}!")
-    os.remove('deneme.png')
 
 
 def isOnline(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=config.admin_id, text="Yes father, I'm alive :)")
+    context.bot.send_message(chat_id=config.admin_id, text="Yes father, I'm alive..")
 
 
 def main():
