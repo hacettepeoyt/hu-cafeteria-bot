@@ -6,7 +6,7 @@ def main(txtFile):
     menuTxt = open(txtFile).readlines()
 
     today = datetime.date.today().day
-    day = today % 8
+    day = today % 14
 
     # Color tuples
     blackColor = (0,0,0)
@@ -18,11 +18,16 @@ def main(txtFile):
     blueBackground = 'resources/backgrounds/blue.jpg'
     greenBackground = 'resources/backgrounds/green.jpg'
     yellowBackground = 'resources/backgrounds/yellow.jpg'
+    lilacBackground = 'resources/backgrounds/lilac.jpg'
+    purpleBackground = 'resources/backgrounds/purple.jpg'
+    greyBackground = 'resources/backgrounds/grey.jpg'
 
 
     # This is for changing the color-background duo every 8 days.
     dailySets = ((pinkBackground, blueColor), (blueBackground, blueColor), (greenBackground, blueColor), (yellowBackground, blueColor),
-                 (pinkBackground, blackColor), (blueBackground, blackColor), (greenBackground, blackColor), (yellowBackground, blackColor))
+                 (lilacBackground, blueColor), (purpleBackground, blueColor), (greyBackground, blueColor), (pinkBackground, blackColor),
+                 (blueBackground, blackColor), (greenBackground, blackColor), (yellowBackground, blackColor), (lilacBackground, blackColor),
+                 (purpleBackground, blackColor), (greyBackground, blackColor))
 
     # Choosing background image and font color
     todaysBackground = dailySets[day][0]
