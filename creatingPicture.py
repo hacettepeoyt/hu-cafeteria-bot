@@ -53,6 +53,3 @@ def main(txtFile):
     menu.text((75,1130), text=f'Toplam: {calorie} cal', font=font, fill=redColor)
 
     img.save('menu.png')
-
-
-main('dailyMenus/2022.02.28')
