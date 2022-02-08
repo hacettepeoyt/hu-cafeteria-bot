@@ -8,6 +8,7 @@ from telegram.ext import Updater, CommandHandler, CallbackContext
 import config
 import creatingPicture
 
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -16,35 +17,17 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Logging into text file for debugging while testing something.
-def log_print(text):
-    with open('logs.txt', 'a') as logFile:
-        logFile.writelines(f"{datetime.datetime.now()}     {text}\n")
-
-
-def dateReverser(date):
-    tempList = date.split(".")
-    newDate = f"{tempList[2]}.{tempList[1]}.{tempList[0]}"
-    return newDate
-
-
 def start(update: Update, context: CallbackContext):
     update.message.reply_text("Hacettepe Yemekhanecisi'ne hoşgeldin Hacettepeli!")
-
-    # job_queue works in UTC time zone, it will be updated in the future versions of the bot!
-    context.job_queue.run_daily(updateDatabase, time=datetime.time(hour=21, minute=0))
-    log_print("updateDatabase() is in the job queue right now!")
-
-    context.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=5, minute=0))
-    log_print("send_dailyMenu() is in the job queue right now!")
 
 
 def updateDatabase(context: CallbackContext):
     os.system('python3 main.py')
-    log_print(f"Menu list has been scrapped from website")
+    context.bot.send_message(chat_id=config.admin_id, text="Time to refresh my memory!")
 
 
 def send_dailyMenu(context: CallbackContext):
+
     # Reformatting the date to search in database
     todaysDate = str(datetime.date.today()).replace("-", ".")
     if todaysDate[8] == '0':
@@ -52,22 +35,21 @@ def send_dailyMenu(context: CallbackContext):
 
     # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(f'dailyMenus/{todaysDate}')
-    log_print("Menu photo has been generated")
     context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
-    log_print("Daily menu has been sent!")
 
 
 def send_now(update: Update, context: CallbackContext):
     user = update.message.from_user
     user_id = user['id']
 
+    # Reformatting the date to search in database
     todaysDate = str(datetime.date.today()).replace("-", ".")
     if todaysDate[8] == '0':
         todaysDate = todaysDate[:8] + todaysDate[-1]
 
+    # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(f'dailyMenus/{todaysDate}')
     context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
-    log_print(f"Daily menu has been sent to {user_id}!")
 
 
 def isOnline(update: Update, context: CallbackContext):
@@ -75,14 +57,26 @@ def isOnline(update: Update, context: CallbackContext):
 
 
 def main():
-    updater = Updater(config.API_KEY, use_context=True)
+    TOKEN = config.API_KEY
+    PORT = int(os.environ.get('PORT', '8443'))
+    updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start)),
     dispatcher.add_handler(CommandHandler("online_status", isOnline))
     dispatcher.add_handler(CommandHandler("send_now", send_now))
 
-    updater.start_polling()
+    # job_queue works in UTC time zone, it will be updated in the future versions of the bot!
+    # First job is updating menu files every day at midnight
+    # Second job is sending the menu to the channel
+    updater.job_queue.run_daily(updateDatabase, time=datetime.time(hour=4, minute=55))
+    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=5, minute=0))
+
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(PORT),
+                          url_path=TOKEN,
+                          webhook_url='https://infinite-wildwood-55276.herokuapp.com/' + TOKEN)
+
     updater.idle()
 
 
