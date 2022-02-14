@@ -21,7 +21,7 @@ Pull requests are welcome!
 
 ## In the future
 
->Using mangodb instead of txt files
+>Using mongodb instead of txt files
 
 >Bot will work in any channel and private chat
 
