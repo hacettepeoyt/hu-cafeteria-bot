@@ -1,9 +1,14 @@
 from PIL import Image, ImageDraw, ImageFont
 import datetime
+import pandas as pd
 
 
-def main(txtFile):
-    menuTxt = open(txtFile).readlines()
+def main(todaysDate):
+
+    # Reading the menu from csv file with pandas.
+    hacettepe_menu = pd.read_csv('hacettepe_menu.csv', index_col='date')
+    meals = str(hacettepe_menu.loc[todaysDate]['meal']).split('&&')
+    calorie = str(hacettepe_menu.loc[todaysDate]['calorie'])
 
     today = datetime.date.today().day
     day = today % 14
@@ -42,19 +47,10 @@ def main(txtFile):
 
     # One by one placing meals into the menu picture
     y = 220
-    calorie = None
-    for line in menuTxt:
-        line = line.replace('\n', '')
-        if line == '':
-            continue
-        if line.split()[0] == 'Kalori:':
-            calorie = line.split()[1]
-            break
-
-        menu.text((75, y), text='• '+line, font=font, fill=todaysColor)
+    for meal in meals:
+        menu.text((75, y), text='• '+meal, font=font, fill=todaysColor)
         y += 150
-
 
     menu.text((75,1130), text=f'Toplam: {calorie} cal', font=font, fill=redColor)
 
-    img.save('menu.png')
+    img.save(f"menu.png")

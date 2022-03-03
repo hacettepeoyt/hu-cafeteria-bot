@@ -1,10 +1,10 @@
 import datetime
 import logging
-import os
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
+import fetchingMenu
 import config
 import creatingPicture
 
@@ -22,7 +22,7 @@ def start(update: Update, context: CallbackContext):
 
 
 def updateDatabase(context: CallbackContext):
-    os.system('python3 main.py')
+    fetchingMenu.fetch_data_fromXML()
     context.bot.send_message(chat_id=config.admin_id, text="Time to refresh my memory!")
 
 
@@ -34,21 +34,17 @@ def send_dailyMenu(context: CallbackContext):
         todaysDate = todaysDate[:8] + todaysDate[-1]
 
     # Texts will be printed on background image and then, bot will send it
-    creatingPicture.main(f'dailyMenus/{todaysDate}')
+    creatingPicture.main(todaysDate)
     context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
 
 
 def send_now(update: Update, context: CallbackContext):
     user = update.message.from_user
     user_id = user['id']
-
-    # Reformatting the date to search in database
-    todaysDate = str(datetime.date.today()).replace("-", ".")
-    if todaysDate[8] == '0':
-        todaysDate = todaysDate[:8] + todaysDate[-1]
+    todaysDate = str(context.args[0])
 
     # Texts will be printed on background image and then, bot will send it
-    creatingPicture.main(f'dailyMenus/{todaysDate}')
+    creatingPicture.main(todaysDate)
     context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
 
 
