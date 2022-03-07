@@ -1,7 +1,8 @@
-config.py
+src/config.py
 __pycache__/
 logs.txt
 dailyMenus/
 resources/
 menu.png
 .idea/
+venv/

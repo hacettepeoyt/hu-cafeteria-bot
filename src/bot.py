@@ -4,7 +4,6 @@ import logging
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
-import fetchingMenu
 import config
 import creatingPicture
 
@@ -17,21 +16,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+
+def give_date():
+    today = datetime.date.today()
+    day, year = today.day, today.year
+    month = str(today).split('-')[1]               # Thanks to this way, we are able to do take month value as not integer. We want values like 09 (not 9)
+
+    return f'{day}.{month}.{year}'
+
+
 def start(update: Update, context: CallbackContext):
     update.message.reply_text("Hacettepe Yemekhanecisi'ne hoşgeldin Hacettepeli!")
 
 
-def updateDatabase(context: CallbackContext):
-    fetchingMenu.fetch_data_fromXML()
-    context.bot.send_message(chat_id=config.admin_id, text="Time to refresh my memory!")
-
-
+# Job #
 def send_dailyMenu(context: CallbackContext):
-
-    # Reformatting the date to search in database
-    todaysDate = str(datetime.date.today()).replace("-", ".")
-    if todaysDate[8] == '0':
-        todaysDate = todaysDate[:8] + todaysDate[-1]
+    todaysDate = give_date()
 
     # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(todaysDate)
@@ -41,7 +41,7 @@ def send_dailyMenu(context: CallbackContext):
 def send_now(update: Update, context: CallbackContext):
     user = update.message.from_user
     user_id = user['id']
-    todaysDate = str(context.args[0])
+    todaysDate = give_date()
 
     # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(todaysDate)
@@ -54,7 +54,6 @@ def isOnline(update: Update, context: CallbackContext):
 
 def main():
     TOKEN = config.API_KEY
-    PORT = int(os.environ.get('PORT', '8443'))
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
@@ -62,17 +61,10 @@ def main():
     dispatcher.add_handler(CommandHandler("online_status", isOnline))
     dispatcher.add_handler(CommandHandler("send_now", send_now))
 
-    # job_queue works in UTC time zone, it will be updated in the future versions of the bot!
-    # First job is updating menu files every day at midnight
-    # Second job is sending the menu to the channel
-    updater.job_queue.run_daily(updateDatabase, time=datetime.time(hour=4, minute=55))
+    # job_queue works in UTC time zone, it will be updated in the future versions of the bot! Maybe it won't.
     updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=5, minute=0))
 
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=TOKEN,
-                          webhook_url='https://infinite-wildwood-55276.herokuapp.com/' + TOKEN)
-
+    updater.start_polling()
     updater.idle()
 
 

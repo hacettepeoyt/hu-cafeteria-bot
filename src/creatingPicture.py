@@ -1,17 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont
 import datetime
-import pandas as pd
+import fetchingMenu
 
 
 def main(todaysDate):
-
-    # Reading the menu from csv file with pandas.
-    hacettepe_menu = pd.read_csv('hacettepe_menu.csv', index_col='date')
-    meals = str(hacettepe_menu.loc[todaysDate]['meal']).split('&&')
-    calorie = str(hacettepe_menu.loc[todaysDate]['calorie'])
+    meals, calorie = fetchingMenu.fetch_data_fromXML(todaysDate)
 
     today = datetime.date.today().day
-    day = today % 14
+    day = today % 14                        # This will be used for choosing background image. There are 14 different images.
 
     # Color tuples
     blackColor = (0,0,0)
@@ -39,18 +35,19 @@ def main(todaysDate):
     todaysColor = dailySets[day][1]
 
     img = Image.open(todaysBackground)
-    font = ImageFont.truetype('resources/fonts/UbuntuCondensed-Regular.ttf', 50)
-    titeFont = ImageFont.truetype('resources/fonts/Courgette-Regular.ttf', 60)
+    defaultFont = ImageFont.truetype('resources/fonts/UbuntuCondensed-Regular.ttf', 50)
+    titleFont = ImageFont.truetype('resources/fonts/Courgette-Regular.ttf', 60)
 
     menu = ImageDraw.Draw(img)
-    menu.text((315,50), '~Günün Menüsü~', font=titeFont, fill=todaysColor)
+    menu.text((315,50), '~Günün Menüsü~', font=titleFont, fill=todaysColor)
+
 
     # One by one placing meals into the menu picture
-    y = 220
+    yCoordinate = 220
     for meal in meals:
-        menu.text((75, y), text='• '+meal, font=font, fill=todaysColor)
-        y += 150
+        menu.text((75, yCoordinate), text='• '+meal, font=defaultFont, fill=todaysColor)
+        yCoordinate += 150
 
-    menu.text((75,1130), text=f'Toplam: {calorie} cal', font=font, fill=redColor)
+    menu.text((75,1130), text=f'Toplam: {calorie} cal', font=defaultFont, fill=redColor)
 
-    img.save(f"menu.png")
+    img.save(f'menu.png')
