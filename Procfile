@@ -1,1 +1,1 @@
-web: python3 yemekhaneBot.py
+web: python3 src/bot.py

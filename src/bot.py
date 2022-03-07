@@ -54,6 +54,7 @@ def isOnline(update: Update, context: CallbackContext):
 
 def main():
     TOKEN = config.API_KEY
+    PORT = int(os.environ.get('PORT', '8443'))
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
@@ -61,10 +62,13 @@ def main():
     dispatcher.add_handler(CommandHandler("online_status", isOnline))
     dispatcher.add_handler(CommandHandler("send_now", send_now))
 
-    # job_queue works in UTC time zone, it will be updated in the future versions of the bot! Maybe it won't.
     updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=5, minute=0))
 
-    updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(PORT),
+                          url_path=TOKEN,
+                          webhook_url='https://infinite-wildwood-55276.herokuapp.com/' + TOKEN)
+
     updater.idle()
 
 
