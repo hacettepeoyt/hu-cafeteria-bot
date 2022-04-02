@@ -1,12 +1,13 @@
 import datetime
 import logging
+import os
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 import config
 import creatingPicture
-
+import iftarVaktiReader
 
 # Enable logging
 logging.basicConfig(
@@ -14,7 +15,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 def give_date():
@@ -35,7 +35,8 @@ def send_dailyMenu(context: CallbackContext):
 
     # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(todaysDate)
-    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'),
+                           caption=f'İftar Saati: {iftarVaktiReader.get_iftarVakti_today()}')
 
 
 def send_now(update: Update, context: CallbackContext):
@@ -45,7 +46,8 @@ def send_now(update: Update, context: CallbackContext):
 
     # Texts will be printed on background image and then, bot will send it
     creatingPicture.main(todaysDate)
-    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'),
+                           caption=f'İftar Saati: {iftarVaktiReader.get_iftarVakti_today()}')
 
 
 def isOnline(update: Update, context: CallbackContext):
@@ -68,7 +70,6 @@ def main():
                           port=int(PORT),
                           url_path=TOKEN,
                           webhook_url='https://infinite-wildwood-55276.herokuapp.com/' + TOKEN)
-
     updater.idle()
 
 
