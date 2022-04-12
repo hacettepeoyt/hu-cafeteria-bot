@@ -41,12 +41,13 @@ def main(todaysDate):
     menu = ImageDraw.Draw(img)
     menu.text((315,50), '~Günün Menüsü~', font=titleFont, fill=todaysColor)
 
+    increment_between_lines = 875 / len(meals)
 
     # One by one placing meals into the menu picture
     yCoordinate = 220
     for meal in meals:
         menu.text((75, yCoordinate), text='• '+meal, font=defaultFont, fill=todaysColor)
-        yCoordinate += 150
+        yCoordinate += increment_between_lines
 
     menu.text((75,1130), text=f'Toplam: {calorie} cal', font=defaultFont, fill=redColor)
 
