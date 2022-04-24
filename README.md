@@ -18,16 +18,3 @@ This bot currently running under Heroku servers. Procfile is necessary due that.
 
 ## Contributing
 Pull requests are welcome!
-
-## In the future
-
->Using mongodb instead of txt files
-
->Bot will work in any channel and private chat
-
->Update: I've found a better way to fetch the data. Probably, I'll use it in the future.
-
->There will be more background image. Variety is needed :)
-
->P̶h̶o̶t̶o̶ ̶b̶a̶s̶e̶d̶ ̶m̶e̶s̶s̶a̶g̶e̶s̶ ̶w̶i̶l̶l̶ ̶b̶e̶ ̶u̶s̶e̶d̶ ̶i̶n̶s̶t̶e̶a̶d̶ ̶o̶f̶ ̶j̶u̶s̶t̶ ̶t̶e̶x̶t̶s̶
-
