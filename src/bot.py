@@ -6,10 +6,9 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 import config
-import creatingPicture
-import iftarVaktiReader
+import image
 
-# Enable logging
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
@@ -26,17 +25,14 @@ def give_date():
 
 
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Hacettepe Yemekhanecisi'ne hoşgeldin Hacettepeli!")
+    update.message.reply_text("@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
 
 
-# Job #
 def send_dailyMenu(context: CallbackContext):
     todaysDate = give_date()
 
-    # Texts will be printed on background image and then, bot will send it
-    creatingPicture.main(todaysDate)
-    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'),
-                           caption=f'İftar Saati: {iftarVaktiReader.get_iftarVakti_today()}')
+    image.main(todaysDate)
+    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
 
 
 def send_now(update: Update, context: CallbackContext):
@@ -44,14 +40,20 @@ def send_now(update: Update, context: CallbackContext):
     user_id = user['id']
     todaysDate = give_date()
 
-    # Texts will be printed on background image and then, bot will send it
-    creatingPicture.main(todaysDate)
-    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'),
-                           caption=f'İftar Saati: {iftarVaktiReader.get_iftarVakti_today()}')
+    image.main(todaysDate)
+    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
 
 
-def isOnline(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=config.admin_id, text="Yes father, I'm alive..")
+def send(update: Update, context: CallbackContext):
+    user = update.message.from_user
+    user_id = user['id']
+    todaysDate = context.args[0]
+
+    try:
+        image.main(todaysDate)
+        context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+    except:
+        context.bot.send_message(chat_id=user_id, text="Hata!")
 
 
 def main():
@@ -61,10 +63,10 @@ def main():
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start)),
-    dispatcher.add_handler(CommandHandler("online_status", isOnline))
     dispatcher.add_handler(CommandHandler("send_now", send_now))
+    dispatcher.add_handler(CommandHandler("send", send))
 
-    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=5, minute=0))
+    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=6, minute=15))
 
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
