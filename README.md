@@ -1,6 +1,14 @@
-![Hacettepe Yemekhanecisi Banner](resources/logo/hu-cafeteria-bot-banner-light.png#gh-light-mode-only)
-![Hacettepe Yemekhanecisi Banner](resources/logo/hu-cafeteria-bot-banner-dark.png#gh-dark-mode-only)
-_<p align=right>designed by: @kaguyaa03</p>_
+<p align="center">
+  <img src="resources/logo/logo-circle.png" width="200">
+</p>
+
+
+*"An orange color digital art logo of a deer slurping noodles in a bowl, logo in the white background circle"* **- Dall E**
+
+*"I tweaked colors later on"* **- Admin**
+
+-------
+
 It's a Telegram bot that shares cafeteria menu. Visit the official [channel](https://t.me/hacettepeyemekhane).
 
 ## Contributing
