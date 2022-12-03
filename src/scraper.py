@@ -16,16 +16,8 @@ def fetch_data_fromXML(todaysDate):
 
         if date == todaysDate:
             for meal in day.select('yemek'):
-                text = meal.text.strip()
-
-                if '*' in text and text[0] != '*':
-                    split = text.split('*')
-                    meals.append(split[0])
-                    meals.append('*' + split[1].strip())
-                else:
-                    meals.append(text)
+                meals.append(meal.text.strip())
 
             calorie = day.select_one('kalori').text
 
     return meals, calorie
-    

@@ -7,7 +7,6 @@
 
 import os
 import random
-import datetime
 
 from PIL import Image, ImageDraw, ImageFont
 from scraper import fetch_data_fromXML
@@ -39,7 +38,7 @@ red_color = (255,17,0)
 def main(todays_date):
     meals, calorie = fetch_data_fromXML(todays_date)
 
-    today = datetime.date.today().day
+    today = int(todays_date.split('.')[0])
     day = today % 13                        # There are 13 different background color, that's why.
 
     img = get_background(day)

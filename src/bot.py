@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def give_date():
     today = datetime.date.today()
     day, year = today.day, today.year
-    month = str(today).split('-')[1]               # Thanks to this way, we are able to do take month value as not integer. We want values like 09 (not 9)
+    month = str(today).split('-')[1]
 
     return f'{day}.{month}.{year}'
 
@@ -32,7 +32,7 @@ def send_dailyMenu(context: CallbackContext):
     todaysDate = give_date()
 
     image.main(todaysDate)
-    context.bot.send_photo(chat_id=config.chat_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=config.CHANNEL_ID, photo=open('menu.png', 'rb'))
 
 
 def send_now(update: Update, context: CallbackContext):
@@ -58,7 +58,7 @@ def send(update: Update, context: CallbackContext):
 
 def main():
     TOKEN = config.API_KEY
-    PORT = int(os.environ.get('PORT', '8443'))
+    PORT = int(os.environ.get('PORT', config.PORT))
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
@@ -66,12 +66,12 @@ def main():
     dispatcher.add_handler(CommandHandler("send_now", send_now))
     dispatcher.add_handler(CommandHandler("send", send))
 
-    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=6, minute=15))
-
+    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
+    
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN,
-                          webhook_url='https://infinite-wildwood-55276.herokuapp.com/' + TOKEN)
+                          webhook_url=config.WEBHOOK_URL)
     updater.idle()
 
 
