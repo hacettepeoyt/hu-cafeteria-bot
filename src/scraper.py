@@ -16,8 +16,15 @@ def fetch_data_fromXML(todaysDate):
 
         if date == todaysDate:
             for meal in day.select('yemek'):
-                meals.append(meal.text.strip())
+                meal = meal.text.strip()
+
+                if meal:
+                    meals.append(meal)
 
             calorie = day.select_one('kalori').text
+
+    if not meals:
+        # Maybe introduce proper error handling with logging?
+        print(f"[ERROR] There isn't a menu for the given date: {todaysDate}")
 
     return meals, calorie
