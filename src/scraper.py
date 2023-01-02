@@ -25,7 +25,7 @@ def fetch_data_fromXML(todaysDate: str) -> tuple[list[str], str]:
                 if meal_str:
                     meals.append(meal_str)
 
-                calorie = day.select_one('kalori').text
+            calorie = day.select_one('kalori').text
 
     if not meals:
         # Maybe introduce proper error handling with logging?
