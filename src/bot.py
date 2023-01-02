@@ -17,9 +17,10 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 def give_date() -> str:
-    today = datetime.date.today()
-    day, year = today.day, today.year
-    month = str(today).split('-')[1]
+    today: datetime.date = datetime.date.today()
+    day: int = today.day
+    year: int = today.year
+    month: str = str(today).split('-')[1]
 
     return f'{day}.{month}.{year}'
 
