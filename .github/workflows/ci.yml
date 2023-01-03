@@ -1,5 +1,11 @@
 name: Lint
-on: [push, pull_request]
+
+on:
+  pull_request:
+    branches-ignore:
+      - 'master'
+  push:
+
 jobs:
   mypy:
     name: mypy
