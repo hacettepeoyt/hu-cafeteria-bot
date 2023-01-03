@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup, element, Tag
 import requests
+from typing import Optional
 
 
 def fetch_data_fromXML(todaysDate: str) -> tuple[list[str], str]:
@@ -15,7 +16,9 @@ def fetch_data_fromXML(todaysDate: str) -> tuple[list[str], str]:
 
     day: element.Tag
     for day in soup.select('gun'):
-        date: str = day.select_one('tarih').text.split()[0]
+        day_date_obj: Optional[Tag] = day.select_one('tarih')
+        assert day_date_obj is not None, "[ERROR] Can't get the date from the XML."
+        date: str = day_date_obj.text.split()[0]
 
         if date == todaysDate:
             meal_tag: element.Tag
@@ -24,8 +27,9 @@ def fetch_data_fromXML(todaysDate: str) -> tuple[list[str], str]:
 
                 if meal_str:
                     meals.append(meal_str)
-
-            calorie = day.select_one('kalori').text
+            calorie_select_obj: Optional[Tag] = day.select_one('kalori')
+            assert calorie_select_obj is not None, "[ERROR] Can't get total calorie amount from the XML."
+            calorie = calorie_select_obj.text
 
     if not meals:
         # Maybe introduce proper error handling with logging?
