@@ -2,12 +2,13 @@ import datetime
 import logging
 import os
 
-from telegram import Update, User
-from telegram.ext import Updater, CommandHandler, CallbackContext
-
+from telegram import Message, Bot, Update, User
+from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher
 import config
 import image
 
+from telegram.ext.utils.types import UD, CD, BD
+from typing import Any, Callable, Protocol
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -25,12 +26,12 @@ def give_date() -> str:
     return f'{day}.{month}.{year}'
 
 
-def start(update: Update, context: CallbackContext):
+def start(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     update.message.reply_text(
-        "@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
+        text="@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
 
 
-def send_dailyMenu(context: CallbackContext):
+def send_dailyMenu(context: CallbackContext[UD, CD, BD]) -> None:
     todaysDate: str = give_date()
 
     image.main(todaysDate)
@@ -38,7 +39,7 @@ def send_dailyMenu(context: CallbackContext):
                            photo=open('menu.png', 'rb'))
 
 
-def send_now(update: Update, context: CallbackContext):
+def send_now(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
     user_id: object = user['id']
     todaysDate: str = give_date()
@@ -47,10 +48,12 @@ def send_now(update: Update, context: CallbackContext):
     context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
 
 
-def send(update: Update, context: CallbackContext):
+def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
     user_id: object = user['id']
-    todaysDate: str = context.args[0]
+    context_args_obj = context.args
+    if context_args_obj is not None:
+        todaysDate: str = context_args_obj[0]
 
     try:
         image.main(todaysDate)
@@ -59,15 +62,20 @@ def send(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=user_id, text="Hata!")
 
 
-def main():
-    TOKEN = config.API_KEY
-    PORT = int(os.environ.get('PORT', config.PORT))
-    updater = Updater(TOKEN)
+def main() -> None:
+    TOKEN: str = config.API_KEY
+    PORT: int = int(os.environ.get('PORT', config.PORT))
+    """ Updater and Dispatcher inherits from a generic type so this annotation will be blank.
+        As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
+    """
+
+    updater = Updater(token=TOKEN)
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler("start", start)),
-    dispatcher.add_handler(CommandHandler("send_now", send_now))
-    dispatcher.add_handler(CommandHandler("send", send))
+    dispatcher.add_handler(CommandHandler(command="start", callback=start)),
+    dispatcher.add_handler(CommandHandler(
+        command="send_now", callback=send_now))
+    dispatcher.add_handler(CommandHandler(command="send", callback=send))
 
     updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(
         hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
@@ -76,8 +84,9 @@ def main():
                           port=int(PORT),
                           url_path=TOKEN,
                           webhook_url=config.WEBHOOK_URL)
-    updater.idle()
+    updater.stop()
 
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     main()
+"""
