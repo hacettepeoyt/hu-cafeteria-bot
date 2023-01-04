@@ -65,10 +65,10 @@ def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
 def main() -> None:
     TOKEN: str = config.API_KEY
     PORT: int = int(os.environ.get('PORT', config.PORT))
+
     """ Updater and Dispatcher inherits from a generic type so this annotation will be blank.
         As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
     """
-
     updater = Updater(token=TOKEN)
     dispatcher = updater.dispatcher
 
@@ -84,9 +84,8 @@ def main() -> None:
                           port=int(PORT),
                           url_path=TOKEN,
                           webhook_url=config.WEBHOOK_URL)
-    updater.stop()
+    updater.idle()
 
 
-"""if __name__ == '__main__':
+if __name__ == '__main__':
     main()
-"""
