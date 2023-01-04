@@ -2,52 +2,58 @@ import datetime
 import logging
 import os
 
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
-
+from telegram import Message, Bot, Update, User
+from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher
 import config
 import image
 
+from telegram.ext.utils.types import UD, CD, BD
+from typing import Any, Callable, Protocol
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-def give_date():
-    today = datetime.date.today()
-    day, year = today.day, today.year
-    month = str(today).split('-')[1]
+def give_date() -> str:
+    today: datetime.date = datetime.date.today()
+    day: int = today.day
+    year: int = today.year
+    month: str = str(today).split('-')[1]
 
     return f'{day}.{month}.{year}'
 
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
+def start(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
+    update.message.reply_text(
+        text="@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
 
 
-def send_dailyMenu(context: CallbackContext):
-    todaysDate = give_date()
+def send_dailyMenu(context: CallbackContext[UD, CD, BD]) -> None:
+    todaysDate: str = give_date()
 
     image.main(todaysDate)
-    context.bot.send_photo(chat_id=config.CHANNEL_ID, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=config.CHANNEL_ID,
+                           photo=open('menu.png', 'rb'))
 
 
-def send_now(update: Update, context: CallbackContext):
-    user = update.message.from_user
-    user_id = user['id']
-    todaysDate = give_date()
+def send_now(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
+    user: User = update.message.from_user
+    user_id: object = user['id']
+    todaysDate: str = give_date()
 
     image.main(todaysDate)
     context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
 
 
-def send(update: Update, context: CallbackContext):
-    user = update.message.from_user
-    user_id = user['id']
-    todaysDate = context.args[0]
+def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
+    user: User = update.message.from_user
+    user_id: object = user['id']
+    context_args_obj = context.args
+    if context_args_obj is not None:
+        todaysDate: str = context_args_obj[0]
 
     try:
         image.main(todaysDate)
@@ -56,18 +62,24 @@ def send(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=user_id, text="Hata!")
 
 
-def main():
-    TOKEN = config.API_KEY
-    PORT = int(os.environ.get('PORT', config.PORT))
-    updater = Updater(TOKEN)
+def main() -> None:
+    TOKEN: str = config.API_KEY
+    PORT: int = int(os.environ.get('PORT', config.PORT))
+
+    """ Updater and Dispatcher inherits from a generic type so this annotation will be blank.
+        As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
+    """
+    updater = Updater(token=TOKEN)
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler("start", start)),
-    dispatcher.add_handler(CommandHandler("send_now", send_now))
-    dispatcher.add_handler(CommandHandler("send", send))
+    dispatcher.add_handler(CommandHandler(command="start", callback=start)),
+    dispatcher.add_handler(CommandHandler(
+        command="send_now", callback=send_now))
+    dispatcher.add_handler(CommandHandler(command="send", callback=send))
 
-    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
-    
+    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(
+        hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
+
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN,
