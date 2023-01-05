@@ -18,12 +18,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 def give_date() -> str:
-    today: datetime.date = datetime.date.today()
-    day: int = today.day
-    year: int = today.year
-    month: str = str(today).split('-')[1]
-
-    return f'{day}.{month}.{year}'
+    return datetime.datetime.now().strftime("%d.%m.%Y")
 
 
 def start(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
