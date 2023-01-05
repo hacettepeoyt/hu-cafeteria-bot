@@ -3,7 +3,7 @@ import logging
 import os
 
 from telegram import Message, Bot, Update, User
-from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher
+from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher, JobQueue
 import config
 import image
 
@@ -70,14 +70,15 @@ def main() -> None:
         As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
     """
     updater = Updater(token=TOKEN)
-    dispatcher = updater.dispatcher
+    dispatcher = updater.dispatcher # type: ignore[has-type]
+    job_queue: JobQueue = updater.job_queue # type: ignore[has-type]
 
     dispatcher.add_handler(CommandHandler(command="start", callback=start)),
     dispatcher.add_handler(CommandHandler(
         command="send_now", callback=send_now))
     dispatcher.add_handler(CommandHandler(command="send", callback=send))
 
-    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(
+    job_queue.run_daily(send_dailyMenu, time=datetime.time(
         hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
 
     updater.start_webhook(listen="0.0.0.0",
