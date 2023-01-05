@@ -41,25 +41,23 @@ def send_dailyMenu(context: CallbackContext[UD, CD, BD]) -> None:
 
 def send_now(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    user_id: object = user['id']
     todaysDate: str = give_date()
 
     image.main(todaysDate)
-    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
 
 
 def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    user_id: object = user['id']
     context_args_obj = context.args
     if context_args_obj is not None:
         todaysDate: str = context_args_obj[0]
 
     try:
         image.main(todaysDate)
-        context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+        context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
     except:
-        context.bot.send_message(chat_id=user_id, text="Hata!")
+        context.bot.send_message(chat_id=user.id, text="Hata!")
 
 
 def main() -> None:
