@@ -3,7 +3,7 @@ import logging
 import os
 
 from telegram import Message, Bot, Update, User
-from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher
+from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher, JobQueue
 import config
 import image
 
@@ -18,12 +18,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 def give_date() -> str:
-    today: datetime.date = datetime.date.today()
-    day: int = today.day
-    year: int = today.year
-    month: str = str(today).split('-')[1]
-
-    return f'{day}.{month}.{year}'
+    return datetime.datetime.now().strftime("%d.%m.%Y")
 
 
 def start(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
@@ -41,25 +36,23 @@ def send_dailyMenu(context: CallbackContext[UD, CD, BD]) -> None:
 
 def send_now(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    user_id: object = user['id']
     todaysDate: str = give_date()
 
     image.main(todaysDate)
-    context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+    context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
 
 
 def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    user_id: object = user['id']
     context_args_obj = context.args
     if context_args_obj is not None:
         todaysDate: str = context_args_obj[0]
 
     try:
         image.main(todaysDate)
-        context.bot.send_photo(chat_id=user_id, photo=open('menu.png', 'rb'))
+        context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
     except:
-        context.bot.send_message(chat_id=user_id, text="Hata!")
+        context.bot.send_message(chat_id=user.id, text="Hata!")
 
 
 def main() -> None:
@@ -70,14 +63,15 @@ def main() -> None:
         As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
     """
     updater = Updater(token=TOKEN)
-    dispatcher = updater.dispatcher
+    dispatcher = updater.dispatcher # type: ignore[has-type]
+    job_queue: JobQueue = updater.job_queue # type: ignore[has-type]
 
     dispatcher.add_handler(CommandHandler(command="start", callback=start)),
     dispatcher.add_handler(CommandHandler(
         command="send_now", callback=send_now))
     dispatcher.add_handler(CommandHandler(command="send", callback=send))
 
-    updater.job_queue.run_daily(send_dailyMenu, time=datetime.time(
+    job_queue.run_daily(send_dailyMenu, time=datetime.time(
         hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
 
     updater.start_webhook(listen="0.0.0.0",
