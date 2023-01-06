@@ -55,7 +55,7 @@ def find_possible_dates(_date: str) -> list[str]:
     Note that, the _date value will be assumed in DD.YY.YYYY
     """
 
-    split_date: str = _date.split('.')
+    split_date: list[str] = _date.split('.')
     day: str = split_date[0]
     month: str = split_date[1]
     year: str = split_date[2]
