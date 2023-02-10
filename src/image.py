@@ -6,7 +6,7 @@
 
 import os
 import random
-
+import json, datetime
 from PIL import Image, ImageDraw, ImageFont
 from scraper import fetch_data_fromXML
 
@@ -36,9 +36,12 @@ red_color: tuple[int, int, int] = (255, 17, 0)
 def main(todays_date: str) -> None:
     meals: list[str]
     calorie: str
-    meals, calorie = fetch_data_fromXML(todays_date)
-
     today: int = int(todays_date.split('.')[0])
+
+
+    meals, calorie = update_db(todays_date)
+
+
     # There are 13 different background color, that's why.
     day: int = today % 13
 
@@ -65,7 +68,14 @@ def draw(background: Image.Image, meals: list[str], calorie: str) -> None:
     draw.text(
         (75, 1130), text=f'Toplam: {calorie} cal', font=default_font, fill=red_color)
 
-
+def update_db(todays_date):
+    # Update the database here
+    with open("JSON_Database.json", "r", encoding="utf-8") as file:
+        database = json.load(file)
+    today_menu = database[todays_date]
+    today_meals = today_menu["meals"]
+    today_calorie = today_menu["kalori"]
+    return today_meals, today_calorie
 def paste(background: Image.Image) -> None:
     icons: list[Image.Image] = get_icons()
     locations: list[tuple[int, int]] = [
@@ -100,3 +110,5 @@ def get_icons() -> list[Image.Image]:
     icons.extend(nonsquares)
 
     return icons
+if __name__ == '__main__':
+    main(datetime.datetime.now().strftime("%d.%m.%Y"))

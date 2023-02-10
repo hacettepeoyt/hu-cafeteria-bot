@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, element, Tag
 import requests
+import json
 from typing import Optional, Dict, List, Tuple
 
 
@@ -13,24 +14,23 @@ def fetch_data_fromXML() -> Dict[str, Tuple[List[str], str]]:
     meals: list[str] = []
     calorie: str = ''
     dates = []
-    days = []
     calories = []
     day: element.Tag
-    for day in soup.select('gun'):
-        day_date_obj: Optional[Tag] = day.select_one('tarih')
-        day_date_object = day.select_one('tarih')
+    for day in soup.select("gun"):
+        day_date_obj: Optional[Tag] = day.select_one("tarih")
+        day_date_object = day.select_one("tarih")
         a = day_date_object.text.strip()
         current_date_and_day = a.split("<p>")[0]
-        dates.append(current_date_and_day.split()[0])
-        days.append(current_date_and_day.split()[1])
+        dates.append(current_date_and_day.split()[0].replace("'", '"'))
+        
 
         meal_tag: element.Tag
-        for meal_tag in day.select('yemekler'):
+        for meal_tag in day.select("yemekler"):
             meal_str: str = meal_tag.text.strip()
 
             if meal_str:
                 meals.append(meal_str)
-        calorie_select_obj: Optional[Tag] = day.select_one('kalori')
+        calorie_select_obj: Optional[Tag] = day.select_one("kalori")
         assert calorie_select_obj is not None, "[ERROR] Can't get total calorie amount from the XML."
         calorie = calorie_select_obj.text
         calories.append(calorie)
@@ -39,8 +39,14 @@ def fetch_data_fromXML() -> Dict[str, Tuple[List[str], str]]:
         print(f"[ERROR] There isn't a menu in the XML: ")
 
     for i in range(len(meals)):
-        meals[i] = [meals[i].split("\n")]
-        dictionary_for_matching[dates[i]] = meals[i], calories[i]
+        meals[i] = meals[i].split("\n")
+        dictionary_for_matching[dates[i]] = {
+            "meals": meals[i],
+            "kalori": calories[i]
+        }
+    with open("JSON_Database.json", "w", encoding="utf-8") as file:
+        json.dump(dictionary_for_matching, file, ensure_ascii=False)
+
     return dictionary_for_matching
 
 
@@ -71,3 +77,5 @@ def find_possible_dates(_date: str) -> list[str]:
 
     return possible_dates
 
+
+print(fetch_data_fromXML())
