@@ -8,3 +8,4 @@ lib64
 share/
 pyvenv.cfg
 menu.png
+database.json
