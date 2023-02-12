@@ -1,96 +1,90 @@
 import datetime
-import logging
-import os
 import json
+import logging
 
-from telegram import Message, Bot, Update, User
-from telegram.ext import Updater, CommandHandler, CallbackContext, Dispatcher, JobQueue
-import config
-import image
-
+from telegram import Update, User
+from telegram.ext import Updater, CommandHandler, CallbackContext, JobQueue
 from telegram.ext.utils.types import UD, CD, BD
-from typing import Any, Callable, Protocol
-from scraper import fetch_data_fromXML
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
 
-logger: logging.Logger = logging.getLogger(__name__)
+import image
+import scraper
+from config import *
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger: logging.Logger = logging.getLogger()
 
 
-def give_date() -> str:
+def get_date() -> str:
     return datetime.datetime.now().strftime("%d.%m.%Y")
 
 
+def get_menu(date: str) -> dict:
+    with open("database.json", 'r') as file:
+        menu = json.load(file)[date]
+    return menu
+
+
 def start(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
-    update.message.reply_text(
-        text="@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
-
-
-def send_dailyMenu(context: CallbackContext[UD, CD, BD]) -> None:
-    todaysDate: str = give_date()
-
-    image.main(todaysDate)
-    context.bot.send_photo(chat_id=config.CHANNEL_ID,
-                           photo=open('menu.png', 'rb'))
+    update.message.reply_text(text="@hacettepeyemekhane kanalından düzenli olarak menülere ulaşabilirsin!")
 
 
 def send_now(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    todaysDate: str = give_date()
-
-    image.main(todaysDate)
-    context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
+    today_date: str = get_date()
+    menu = get_menu(today_date)
+    image.generate_image(today_date, menu['meals'], menu['calorie'])
+    context.bot.send_photo(chat_id=user.id, photo=open("menu.png", "rb"))
 
 
 def send(update: Update, context: CallbackContext[UD, CD, BD]) -> None:
     user: User = update.message.from_user
-    context_args_obj = context.args
-    if context_args_obj is not None:
-        todaysDate: str = context_args_obj[0]
+    today_date: str = context.args[0]
 
     try:
-        image.main(todaysDate)
-        context.bot.send_photo(chat_id=user.id, photo=open('menu.png', 'rb'))
+        menu = get_menu(today_date)
+        image.generate_image(today_date, menu['meals'], menu['calorie'])
+        context.bot.send_photo(chat_id=user.id, photo=open("menu.png", "rb"))
     except:
         context.bot.send_message(chat_id=user.id, text="Hata!")
 
-def update_db(context: CallbackContext[UD, CD, BD]) :
-    print(fetch_data_fromXML())
-    # Update the database here
-    with open("JSON_Database.json", "r", encoding="utf-8") as file:
-        database = json.load(file)
-    today_menu = database[give_date()]
-    today_meals = today_menu["meals"]
-    today_calorie = today_menu["kalori"]
 
-    return today_meals, today_calorie
+def send_daily(context: CallbackContext[UD, CD, BD]) -> None:
+    today_date: str = get_date()
+    menu = get_menu(today_date)
+    image.generate_image(today_date, menu['meals'], menu['calorie'])
+    context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=open("menu.png", "rb"))
+
+
+def update_db(context: CallbackContext[UD, CD, BD]):
+    all_menu = scraper.scrape()
+    with open("database.json", 'w', encoding="utf-8") as file:
+        json.dump(all_menu, file, ensure_ascii=False, indent=4)
 
 
 def main() -> None:
-    TOKEN: str = config.API_KEY
-    print(config.PORT)
-    PORT: int = int(os.environ.get('PORT', config.PORT))
-
-    """ Updater and Dispatcher inherits from a generic type so this annotation will be blank.
-        As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
     """
-    updater = Updater(token=TOKEN)
-    dispatcher = updater.dispatcher # type: ignore[has-type]
-    job_queue: JobQueue = updater.job_queue # type: ignore[has-type]
-    job_queue.run_daily(update_db, time=datetime.time(hour=15, minute=0))
+    Updater and Dispatcher inherits from a generic type so this annotation will be blank.
+    As Updater uses types from telegram.ext.utils and the used ones are unbound, below annotations are still TODO.
+    """
+
+    updater = Updater(token=TELEGRAM_API_KEY)
+    dispatcher = updater.dispatcher  # type: ignore[has-type]
+    job_queue: JobQueue = updater.job_queue  # type: ignore[has-type]
     dispatcher.add_handler(CommandHandler(command="start", callback=start)),
-    dispatcher.add_handler(CommandHandler(
-        command="send_now", callback=send_now))
+    dispatcher.add_handler(CommandHandler(command="send_now", callback=send_now))
     dispatcher.add_handler(CommandHandler(command="send", callback=send))
 
-    job_queue.run_daily(send_dailyMenu, time=datetime.time(
-        hour=config.SHARE_TIME_HOUR, minute=config.SHARE_TIME_MINUTE))
+    job_queue.run_daily(send_daily, time=datetime.time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE))
+    job_queue.run_daily(update_db, time=datetime.time(hour=UPDATE_DB_TIME_HOUR, minute=UPDATE_DB_TIME_MINUTE))
 
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=TOKEN,
-                          webhook_url=config.WEBHOOK_URL)
+    if WEBHOOK_CONNECTED:
+        updater.start_webhook(listen="0.0.0.0",
+                              port=int(PORT),
+                              url_path=TELEGRAM_API_KEY,
+                              webhook_url=WEBHOOK_URL)
+    else:
+        updater.start_polling()
+
     updater.idle()
 
 
