@@ -1,32 +1,23 @@
-from typing import Dict
-
-import requests
-from bs4 import BeautifulSoup
+import aiohttp
+import xml.etree.ElementTree as ET
 
 
-def scrape() -> Dict:
-    r: requests.Response = requests.get("http://www.sksdb.hacettepe.edu.tr/YemekListesi.xml")
-    r.encoding = "utf-8"
-    xml_text: str = r.text
-    soup: BeautifulSoup = BeautifulSoup(xml_text, "xml")
-    all_menus = {}
+async def scrape() -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get("http://www.sksdb.hacettepe.edu.tr/YemekListesi.xml") as resp:
+            xml_text = await resp.text()
+            return parse_menu(xml_text)
 
-    for day in soup.select("gun"):
-        date = day.select_one("tarih").text.strip().split()[0]
-        date = standardize_date(date)
-        meal_list = []
 
-        for yemek in day.select("yemek"):
-            meal: str = yemek.text.strip()
-
-            if meal:
-                meal_list.append(meal)
-
-        calorie = day.select_one("kalori").text.strip()
-        menu = {"meals": meal_list, "calorie": calorie}
-        all_menus[date] = menu
-
-    return all_menus
+def parse_menu(xml_string):
+    root = ET.fromstring(xml_string)
+    menu_dict = {}
+    for gun in root.findall('gun'):
+        tarih = standardize_date(gun.find('tarih').text.split()[0])
+        yemekler = [yemek.text.strip() for yemek in gun.find('yemekler').findall('yemek') if yemek.text.strip()]
+        calorie = gun.find('kalori').text
+        menu_dict[tarih] = {"meals": yemekler, "calorie": calorie}
+    return menu_dict
 
 
 def standardize_date(date_text: str) -> str:

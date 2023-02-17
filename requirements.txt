@@ -1,5 +1,4 @@
-beautifulsoup4==4.10.0
-Pillow==9.0.1
-python_telegram_bot==13.11
-requests==2.25.1
-lxml==4.7.1
+aiohttp==3.8.4
+Pillow==9.4.0
+python_telegram_bot[job-queue, webhooks]==20.0
+pytz==2022.7.1
