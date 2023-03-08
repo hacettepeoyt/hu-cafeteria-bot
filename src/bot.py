@@ -37,13 +37,13 @@ def generate_menu_text(menu: dict) -> str:
 
 # Command Handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await context.bot.send_message(chat_id=update.effective_user.id,
+    await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text="Merhaba! Menülerden haberdar olmak için @hacettepeyemekhane kanalına "
                                         "katılmalısın!\n\nYardım için /help komutunu kullanmalısın.")
 
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await context.bot.send_message(chat_id=update.effective_user.id,
+    await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text="Aşağıdaki menü butonundan kullanabileceğin komutları öğrenebilirsin.\n\n\n"
                                         "/today   -->   Bugünün menüsünü öğrenmek için kullanabilirsin.\n\n"
                                         "/tomorrow   -->   Yarının menüsünü öğrenmek için kullanabilirsin.\n\n"
@@ -56,12 +56,12 @@ async def send_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     today_date = datetime.now(tz).strftime("%d.%m.%Y")
     menu = get_menu(today_date)
     generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=update.effective_user.id, photo=open("menu.png", "rb"))
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
 
 
 async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not context.args:
-        await context.bot.send_message(chat_id=update.effective_user.id,
+        await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="İstediğin tarihi lütfen belirt!\n"
                                             "<b>Örnek:</b> <i>/custom 01.01.2023</i>",
                                        parse_mode=telegram.constants.ParseMode.HTML)
@@ -71,9 +71,9 @@ async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         custom_date = context.args[0]
         menu = get_menu(custom_date)
         generate_image(custom_date, menu['meals'], menu['calorie'])
-        await context.bot.send_photo(chat_id=update.effective_user.id, photo=open("menu.png", "rb"))
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
     except KeyError:
-        await context.bot.send_message(chat_id=update.effective_user.id,
+        await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="Söylediğin tarihe ait bir menü yok maalesef!")
 
 
@@ -81,7 +81,7 @@ async def send_tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     today_date = (datetime.now(pytz.timezone("Europe/Istanbul")) + timedelta(1)).strftime("%d.%m.%Y")
     menu = get_menu(today_date)
     generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=update.effective_user.id, photo=open("menu.png", "rb"))
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
 
 
 # Error Handler
