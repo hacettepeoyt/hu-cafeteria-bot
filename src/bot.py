@@ -145,7 +145,11 @@ def main() -> None:
     app.add_handler(CommandHandler("tomorrow", send_tomorrow))
     app.add_handler(CommandHandler("custom", send_custom))
     app.add_error_handler(err_handler)
+<<<<<<< Updated upstream
 
+=======
+    app.job_queue.run_once(update_db, 3) #Updates db when program starts
+>>>>>>> Stashed changes
     app.job_queue.run_daily(update_db, time=time(hour=UPDATE_DB_TIME_HOUR, minute=UPDATE_DB_TIME_MINUTE, tzinfo=tz))
     app.job_queue.run_daily(publish_menu_image, time=time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE, tzinfo=tz))
     app.job_queue.run_daily(publish_menu_text, time=time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE, tzinfo=tz))
