@@ -9,9 +9,9 @@ config = toml.load(config_path)
 TELEGRAM_API_KEY: str = config["TELEGRAM_API_KEY"]
 
 # Image Channel ID
-IMAGE_CHANNEL_ID: str = config["IMAGE_CHANNEL_ID"]
-TEXT_CHANNEL_ID: str = config["TEXT_CHANNEL_ID"]
-LOGGER_CHAT_ID: str = config["LOGGER_CHAT_ID"]
+IMAGE_CHANNEL_ID: int = config["IMAGE_CHANNEL_ID"]
+TEXT_CHANNEL_ID: int = config["TEXT_CHANNEL_ID"]
+LOGGER_CHAT_ID: int = config["LOGGER_CHAT_ID"]
 
 # Time Configurations for menu sharing task
 SHARE_TIME_HOUR: int = config["SHARE_TIME_HOUR"]
