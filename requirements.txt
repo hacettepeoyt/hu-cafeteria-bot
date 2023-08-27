@@ -2,3 +2,4 @@ aiohttp==3.8.4
 Pillow==9.4.0
 python_telegram_bot[job-queue, webhooks]==20.0
 pytz==2022.7.1
+toml~=0.10.2
