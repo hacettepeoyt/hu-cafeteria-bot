@@ -1,15 +1,27 @@
-from datetime import datetime, time, timedelta
 import html
 import json
 import logging
-import pytz
 import traceback
+from datetime import datetime, time, timedelta
 
+import pytz
 import telegram.constants
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from .config import *
+from .config import (
+    DB,
+    TELEGRAM_API_KEY,
+    IMAGE_CHANNEL_ID,
+    TEXT_CHANNEL_ID,
+    LOGGER_CHAT_ID,
+    SHARE_TIME_HOUR,
+    SHARE_TIME_MINUTE,
+    UPDATE_DB_TIME_HOUR,
+    UPDATE_DB_TIME_MINUTE,
+    WEBHOOK_CONNECTED,
+    PORT,
+    WEBHOOK_URL)
 from .image import generate_image
 from .scraper import scrape
 
@@ -22,7 +34,7 @@ tz = pytz.timezone("Europe/Istanbul")
 
 
 def get_menu(date: str) -> dict:
-    with open(db, 'r') as file:
+    with open(DB, 'r') as file:
         menu = json.load(file)[date]
     return menu
 
@@ -115,7 +127,7 @@ async def err_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> Non
 # Jobs
 async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
     all_menus = await scrape()
-    with open(db, 'w', encoding="utf-8") as file:
+    with open(DB, 'w', encoding="utf-8") as file:
         json.dump(all_menus, file, ensure_ascii=False, indent=4)
     logger.info("Database has been updated!")
 

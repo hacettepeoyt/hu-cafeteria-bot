@@ -16,7 +16,7 @@ parser.add_argument('-d', '--database',
 args = parser.parse_args()
 
 config = toml.load(args.config)
-db = args.database
+DB = args.database
 
 # Telegram Bot Token
 TELEGRAM_API_KEY: str = config["TELEGRAM_API_KEY"]

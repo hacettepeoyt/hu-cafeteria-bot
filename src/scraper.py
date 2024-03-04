@@ -1,5 +1,6 @@
-import aiohttp
 import xml.etree.ElementTree as ET
+
+import aiohttp
 
 
 async def scrape() -> dict:
