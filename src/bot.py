@@ -6,6 +6,7 @@ from datetime import datetime, time, timedelta
 
 import pytz
 import telegram.constants
+from aiohttp import ClientConnectorError
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -141,10 +142,21 @@ async def err_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 # Jobs
 async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
-    all_menus = await scrape()
-    with open(DB, 'w', encoding="utf-8") as file:
-        json.dump(all_menus, file, ensure_ascii=False, indent=4)
-    logger.info("Database has been updated!")
+    try:
+        all_menus = await scrape()
+
+        with open(DB, 'w', encoding="utf-8") as file:
+            json.dump(all_menus, file, ensure_ascii=False)
+            logger.info("Database has been updated!")
+    except ClientConnectorError:
+        message = f"Connection Error, can't reach to SKSDB"
+        logger.exception(message)
+        await context.bot.send_message(chat_id=LOGGER_CHAT_ID, text=message)
+        context.application.job_queue.run_once(update_db, 3600)
+    except:
+        message = f"Undefined Error while connecting to the SKSDB"
+        logger.exception(message)
+        await context.bot.send_message(chat_id=LOGGER_CHAT_ID, text=f"{message}\n\n{traceback.format_exc()}")
 
 
 async def publish_menu_image(context: ContextTypes.DEFAULT_TYPE) -> None:
