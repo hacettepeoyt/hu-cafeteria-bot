@@ -55,8 +55,8 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def send_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     today_date = datetime.now(tz).strftime("%d.%m.%Y")
     menu = get_menu(today_date)
-    generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
+    image_buffer = generate_image(today_date, menu['meals'], menu['calorie'])
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
 
 
 async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -70,18 +70,18 @@ async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     try:
         custom_date = context.args[0]
         menu = get_menu(custom_date)
-        generate_image(custom_date, menu['meals'], menu['calorie'])
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
+        image_buffer = generate_image(custom_date, menu['meals'], menu['calorie'])
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
     except KeyError:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="Söylediğin tarihe ait bir menü yok maalesef!")
 
 
 async def send_tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    today_date = (datetime.now(pytz.timezone("Europe/Istanbul")) + timedelta(1)).strftime("%d.%m.%Y")
-    menu = get_menu(today_date)
-    generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open("menu.png", "rb"))
+    tomorrow_date = (datetime.now(pytz.timezone("Europe/Istanbul")) + timedelta(1)).strftime("%d.%m.%Y")
+    menu = get_menu(tomorrow_date)
+    image_buffer = generate_image(tomorrow_date, menu['meals'], menu['calorie'])
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
 
 
 # Error Handler
@@ -123,8 +123,8 @@ async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def publish_menu_image(context: ContextTypes.DEFAULT_TYPE) -> None:
     today_date = datetime.now().strftime("%d.%m.%Y")
     menu = get_menu(today_date)
-    generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=open("menu.png", "rb"))
+    image_buffer = generate_image(today_date, menu['meals'], menu['calorie'])
+    await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=image_buffer)
     logger.info("Image has been sent to channel")
 
 

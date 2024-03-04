@@ -5,18 +5,22 @@
 
 import os
 import random
+from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont
 
 from .config import BACKGROUND_COLORS
 
 
-def generate_image(date: str, meals: list[str], calorie: str) -> None:
+def generate_image(date: str, meals: list[str], calorie: str) -> BytesIO:
     magical_number = int(date.split('.')[0]) % len(BACKGROUND_COLORS)
     img = get_background(magical_number)
     paste(img)
     draw(img, meals, calorie)
-    img.save('menu.png')
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
 
 
 def draw(background: Image.Image, meals: list[str], calorie: str) -> None:
