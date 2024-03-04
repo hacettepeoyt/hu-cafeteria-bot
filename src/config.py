@@ -1,9 +1,22 @@
-import sys
+import argparse
+from pathlib import Path
 
 import toml
 
-config_path = sys.argv[1] if len(sys.argv) > 1 else "config.toml"
-config = toml.load(config_path)
+parser = argparse.ArgumentParser(description='A Telegram Bot to let people know about Hacettepe Cafeteria Menus')
+parser.add_argument('-c', '--config',
+                    type=Path,
+                    help='Path to config file written in toml format',
+                    required=True)
+parser.add_argument('-d', '--database',
+                    type=Path,
+                    help='Path to database file, written in json format',
+                    required=True)
+
+args = parser.parse_args()
+
+config = toml.load(args.config)
+db = args.database
 
 # Telegram Bot Token
 TELEGRAM_API_KEY: str = config["TELEGRAM_API_KEY"]

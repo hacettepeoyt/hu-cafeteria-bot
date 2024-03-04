@@ -22,7 +22,7 @@ tz = pytz.timezone("Europe/Istanbul")
 
 
 def get_menu(date: str) -> dict:
-    with open("database.json", 'r') as file:
+    with open(db, 'r') as file:
         menu = json.load(file)[date]
     return menu
 
@@ -115,7 +115,7 @@ async def err_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> Non
 # Jobs
 async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
     all_menus = await scrape()
-    with open("database.json", 'w', encoding="utf-8") as file:
+    with open(db, 'w', encoding="utf-8") as file:
         json.dump(all_menus, file, ensure_ascii=False, indent=4)
     logger.info("Database has been updated!")
 
