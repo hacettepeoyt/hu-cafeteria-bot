@@ -47,7 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                         "katılmalısın!\n\nYardım için /help komutunu kullanmalısın.")
 
 
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def _help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text="Aşağıdaki menü butonundan kullanabileceğin komutları öğrenebilirsin.\n\n\n"
                                         "/today   -->   Bugünün menüsünü öğrenmek için kullanabilirsin.\n\n"
@@ -168,7 +168,7 @@ def main() -> None:
     app: Application = Application.builder().token(TELEGRAM_API_KEY).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help))
+    app.add_handler(CommandHandler("help", _help))
     app.add_handler(CommandHandler("today", send_today))
     app.add_handler(CommandHandler("tomorrow", send_tomorrow))
     app.add_handler(CommandHandler("custom", send_custom))
