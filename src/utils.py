@@ -1,8 +1,85 @@
 import os
 import random
+import xml.etree.ElementTree as ET
 from io import BytesIO
 
+import aiohttp
 from PIL import Image, ImageDraw, ImageFont
+
+
+class HacettepeMenuScraper:
+    """
+    Scrapes menu data from a provided URL in XML format.
+
+    Args:
+        url (str, optional): The URL of the XML file containing the menu data.
+            Defaults to "http://www.sksdb.hacettepe.edu.tr/YemekListesi.xml".
+    """
+
+    def __init__(
+            self,
+            url: str = "http://www.sksdb.hacettepe.edu.tr/YemekListesi.xml"
+    ):
+        self.url = url
+
+    async def scrape(self) -> dict:
+        """
+        Asynchronously fetches the XML data from the specified URL and parses
+        it into a dictionary.
+
+        Returns:
+            dict: A dictionary where keys are dates (formatted as "DD.MM.YYYY")
+                and values are dictionaries containing 'meals' (a list of meal
+                descriptions) and 'calorie' (calorie information for the day).
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.url) as resp:
+                xml_text = await resp.text()
+                return self._parse_menu(xml_text)
+
+    def _parse_menu(self, xml_string: str) -> dict:
+        """
+        Parses the XML string into a dictionary of menu items.
+
+        Args:
+            xml_string (str): A string containing the XML data of the menu.
+
+        Returns:
+            dict: A dictionary where keys are dates (formatted as "DD.MM.YYYY")
+                and values are dictionaries containing 'meals' (a list of meal
+                descriptions) and 'calorie' (calorie information for the day).
+        """
+        root = ET.fromstring(xml_string)
+        menu_dict = {}
+
+        for gun in root.findall("gun"):
+            date = self._standardize_date(gun.find("tarih").text.split()[0])
+            meals = [meal.text.strip() for meal in gun.find("yemekler").findall("yemek") if meal.text.strip()]
+            calorie = gun.find("kalori").text
+            menu_dict[date] = {"meals": meals, "calorie": calorie}
+
+        return menu_dict
+
+    @staticmethod
+    def _standardize_date(date_text: str) -> str:
+        """
+        Converts a date string in the format "D.M.YYYY" to "DD.MM.YYYY".
+
+        Args:
+            date_text (str): The date string to be standardized.
+
+        Returns:
+            str: The standardized date string in the format "DD.MM.YYYY".
+        """
+        temp = date_text.split(".")
+        day, month, year = temp[0], temp[1], temp[2]
+
+        if len(day) == 1:
+            day = "0" + day
+        if len(month) == 1:
+            month = "0" + month
+
+        return day + "." + month + "." + year
 
 
 class MenuImageGenerator:

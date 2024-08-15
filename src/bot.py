@@ -25,8 +25,7 @@ from .config import (
     WEBHOOK_URL,
     BACKGROUND_COLORS
 )
-from .scraper import scrape
-from .utils import MenuImageGenerator
+from .utils import HacettepeMenuScraper, MenuImageGenerator
 
 # Logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -35,6 +34,7 @@ logger = logging.getLogger()
 # Utils
 tz = pytz.timezone("Europe/Istanbul")
 
+menu_scraper = HacettepeMenuScraper()
 image_generator = MenuImageGenerator(background_colors=BACKGROUND_COLORS)
 
 
@@ -147,7 +147,7 @@ async def err_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> Non
 # Jobs
 async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
-        all_menus = await scrape()
+        all_menus = await menu_scraper.scrape()
 
         with open(DB, 'w', encoding="utf-8") as file:
             json.dump(all_menus, file, ensure_ascii=False)
