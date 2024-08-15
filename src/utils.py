@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import xml.etree.ElementTree as ET
@@ -236,3 +237,47 @@ class MenuImageGenerator:
             icons.append(Image.open(icon).resize(self.icon_sizes["non_square"]))
 
         return icons
+
+
+class Helper:
+
+    @staticmethod
+    def get_menu(database_path: str, date: str) -> dict:
+        """
+        Retrieves the menu for a given date from the database.
+
+        Args:
+            database_path (str): The path to the database.
+            date (str): The date for which the menu is to be retrieved, formatted
+                as a string.
+
+        Returns:
+            dict: A dictionary containing the menu details for the specified date.
+                The dictionary is expected to have keys such as 'meals' and 'calorie'.
+        """
+        with open(database_path, 'r') as file:
+            menu = json.load(file)[date]
+
+        return menu
+
+    @staticmethod
+    def generate_menu_text(menu: dict) -> str:
+        """
+        Generates a formatted text representation of the menu.
+
+        Args:
+            menu (dict): A dictionary containing the menu details. The dictionary
+                should include a 'meals' key with a list of meal descriptions and
+                a 'calorie' key indicating the total calorie count.
+
+        Returns:
+            str: A string containing the formatted text of the menu, including
+                meal descriptions and the total calorie count.
+        """
+        message = f"<b>Günün Menüsü</b>\n\n"
+
+        for meal in menu['meals']:
+            message += f"- {meal}\n"
+
+        message += f"\nToplam: {menu['calorie']} kalori"
+        return message

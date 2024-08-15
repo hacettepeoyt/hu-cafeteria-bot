@@ -25,31 +25,19 @@ from .config import (
     WEBHOOK_URL,
     BACKGROUND_COLORS
 )
-from .utils import HacettepeMenuScraper, MenuImageGenerator
+from .utils import (
+    HacettepeMenuScraper,
+    Helper,
+    MenuImageGenerator
+)
 
 # Logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger()
 
-# Utils
 tz = pytz.timezone("Europe/Istanbul")
-
 menu_scraper = HacettepeMenuScraper()
 image_generator = MenuImageGenerator(background_colors=BACKGROUND_COLORS)
-
-
-def get_menu(date: str) -> dict:
-    with open(DB, 'r') as file:
-        menu = json.load(file)[date]
-    return menu
-
-
-def generate_menu_text(menu: dict) -> str:
-    message = f"<b>Günün Menüsü</b>\n\n"
-    for meal in menu['meals']:
-        message += f"- {meal}\n"
-    message += f"\nToplam: {menu['calorie']} cal"
-    return message
 
 
 # Command Handlers
@@ -71,7 +59,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def send_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     today_date = datetime.now(tz).strftime("%d.%m.%Y")
-    menu = get_menu(today_date)
+    menu = Helper.get_menu(DB, today_date)
     image_buffer = image_generator.generate(today_date, menu['meals'], menu['calorie'])
     await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
 
@@ -86,7 +74,7 @@ async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     try:
         custom_date = context.args[0]
-        menu = get_menu(custom_date)
+        menu = Helper.get_menu(DB, custom_date)
         image_buffer = image_generator.generate(custom_date, menu['meals'], menu['calorie'])
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
     except KeyError:
@@ -96,7 +84,7 @@ async def send_custom(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def send_tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     tomorrow_date = (datetime.now(pytz.timezone("Europe/Istanbul")) + timedelta(1)).strftime("%d.%m.%Y")
-    menu = get_menu(tomorrow_date)
+    menu = Helper.get_menu(DB, tomorrow_date)
     image_buffer = image_generator.generate(tomorrow_date, menu['meals'], menu['calorie'])
     await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_buffer)
 
@@ -165,9 +153,9 @@ async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def publish_menu(context: ContextTypes.DEFAULT_TYPE) -> None:
     today_date = datetime.now().strftime("%d.%m.%Y")
-    menu = get_menu(today_date)
+    menu = Helper.get_menu(DB, today_date)
     image_buffer = image_generator.generate(today_date, menu['meals'], menu['calorie'])
-    message = generate_menu_text(menu)
+    message = Helper.generate_menu_text(menu)
 
     await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=image_buffer)
     logger.info("Menu has been sent to the image channel")
