@@ -39,3 +39,10 @@ WEBHOOK_URL: str = config["WEBHOOK_URL"]
 
 # Background Colors (list of Hex Numbers that represents colors)
 BACKGROUND_COLORS: list[str] = config["BACKGROUND_COLORS"]
+
+# Email Configuration
+SMTP_HOST = config["SMTP_HOST"]
+SMTP_PORT = config["SMTP_PORT"]
+SMTP_USERNAME = config["SMTP_USERNAME"]
+SMTP_PASSWORD = config["SMTP_PASSWORD"]
+MAILING_LIST_ADDRESS = config["MAILING_LIST_ADDRESS"]
