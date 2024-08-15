@@ -159,20 +159,17 @@ async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
         await context.bot.send_message(chat_id=LOGGER_CHAT_ID, text=f"{message}\n\n{traceback.format_exc()}")
 
 
-async def publish_menu_image(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def publish_menu(context: ContextTypes.DEFAULT_TYPE) -> None:
     today_date = datetime.now().strftime("%d.%m.%Y")
     menu = get_menu(today_date)
     image_buffer = generate_image(today_date, menu['meals'], menu['calorie'])
-    await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=image_buffer)
-    logger.info("Image has been sent to channel")
-
-
-async def publish_menu_text(context: ContextTypes.DEFAULT_TYPE) -> None:
-    today_date = datetime.now().strftime("%d.%m.%Y")
-    menu = get_menu(today_date)
     message = generate_menu_text(menu)
+
+    await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=image_buffer)
+    logger.info("Menu has been sent to the image channel")
+
     await context.bot.send_message(chat_id=TEXT_CHANNEL_ID, text=message, parse_mode=telegram.constants.ParseMode.HTML)
-    logger.info("Text has been sent to channel")
+    logger.info("Menu has been sent to the text channel")
 
 
 def main() -> None:
@@ -187,8 +184,7 @@ def main() -> None:
 
     app.job_queue.run_once(update_db, 3)
     app.job_queue.run_daily(update_db, time=time(hour=UPDATE_DB_TIME_HOUR, minute=UPDATE_DB_TIME_MINUTE, tzinfo=tz))
-    app.job_queue.run_daily(publish_menu_image, time=time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE, tzinfo=tz))
-    app.job_queue.run_daily(publish_menu_text, time=time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE, tzinfo=tz))
+    app.job_queue.run_daily(publish_menu, time=time(hour=SHARE_TIME_HOUR, minute=SHARE_TIME_MINUTE, tzinfo=tz))
 
     if WEBHOOK_CONNECTED:
         app.run_webhook(listen="0.0.0.0",
