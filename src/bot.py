@@ -23,9 +23,14 @@ from .config import (
     WEBHOOK_CONNECTED,
     PORT,
     WEBHOOK_URL,
-    BACKGROUND_COLORS
+    BACKGROUND_COLORS,
+    SMTP_HOST,
+    SMTP_USERNAME,
+    SMTP_PASSWORD,
+    MAILING_LIST_ADDRESS
 )
 from .utils import (
+    EmailService,
     HacettepeMenuScraper,
     Helper,
     MenuImageGenerator
@@ -38,6 +43,9 @@ logger = logging.getLogger()
 tz = pytz.timezone("Europe/Istanbul")
 menu_scraper = HacettepeMenuScraper()
 image_generator = MenuImageGenerator(background_colors=BACKGROUND_COLORS)
+email_service = EmailService(smtp_server=SMTP_HOST,
+                             username=SMTP_USERNAME,
+                             password=SMTP_PASSWORD)
 
 
 # Command Handlers
@@ -156,12 +164,20 @@ async def publish_menu(context: ContextTypes.DEFAULT_TYPE) -> None:
     menu = Helper.get_menu(DB, today_date)
     image_buffer = image_generator.generate(today_date, menu['meals'], menu['calorie'])
     message = Helper.generate_menu_text(menu)
+    email_body = Helper.generate_email_body(menu)
 
     await context.bot.send_photo(chat_id=IMAGE_CHANNEL_ID, photo=image_buffer)
     logger.info("Menu has been sent to the image channel")
 
     await context.bot.send_message(chat_id=TEXT_CHANNEL_ID, text=message, parse_mode=telegram.constants.ParseMode.HTML)
     logger.info("Menu has been sent to the text channel")
+
+    email_service.send(recipients=MAILING_LIST_ADDRESS,
+                       subject=f"{datetime.now().strftime('%Y.%m.%d')} - Günün Menüsü",
+                       message=email_body,
+                       image_buffer=image_buffer,
+                       image_name="menu.png")
+    logger.info("Menu has been sent to email recipients")
 
 
 def main() -> None:

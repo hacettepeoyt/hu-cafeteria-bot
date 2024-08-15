@@ -1,7 +1,11 @@
 import json
 import os
 import random
+import smtplib
 import xml.etree.ElementTree as ET
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from io import BytesIO
 
 import aiohttp
@@ -281,3 +285,89 @@ class Helper:
 
         message += f"\nToplam: {menu['calorie']} kalori"
         return message
+
+    @staticmethod
+    def generate_email_body(menu: dict) -> str:
+        """
+        Generates an email body string from the provided menu dictionary.
+
+        Args:
+            menu (dict): A dictionary containing the menu details. The dictionary
+                should include a 'meals' key with a list of meal descriptions and
+                a 'calorie' key indicating the total calorie count.
+
+        Returns:
+            str: The formatted email body string that lists the meals and total calorie
+                count for the day.
+        """
+        message = f"Günün Menüsü\n\n"
+
+        for meal in menu['meals']:
+            message += f"- {meal}\n"
+
+        message += f"\nToplam: {menu['calorie']} kalori"
+        return message
+
+
+class EmailService:
+    """
+    Provides functionality to send emails with an optional image attachment.
+
+    Args:
+        smtp_server (str): The SMTP server address to send emails through.
+        username (str): The username for the SMTP server authentication.
+        password (str): The password for the SMTP server authentication.
+        smtp_port (int, optional): The port number for the SMTP server. Defaults to 587.
+    """
+
+    def __init__(
+            self,
+            smtp_server: str,
+            username: str,
+            password: str,
+            smtp_port: int = 587,
+    ):
+        self.smtp_server = smtp_server
+        self.username = username
+        self.password = password
+        self.smtp_port = smtp_port
+
+    def send(
+            self,
+            recipients: str | list[str],
+            subject: str,
+            message: str,
+            image_buffer: BytesIO,
+            image_name: str = "image.png",
+    ) -> None:
+        """
+        Sends an email with a specified subject, message, and optional image attachment.
+
+        Args:
+            recipients (str | list[str]): The recipient email addresses. Can be a single
+                email address as a string or a list of email addresses.
+            subject (str): The subject line of the email.
+            message (str): The body of the email.
+            image_buffer (BytesIO): A buffer containing the image data to attach to the email.
+            image_name (str): The name of the image to attach to the email. Defaults to
+                "image.png".
+        """
+        if isinstance(recipients, list):
+            recipients = ", ".join(recipients)
+
+        msg = MIMEMultipart()
+        msg["From"] = self.username
+        msg["To"] = recipients
+        msg["Subject"] = subject
+
+        image_buffer.seek(0)
+        image = MIMEImage(image_buffer.read(), name=image_name)
+
+        msg.attach(MIMEText(message))
+        msg.attach(image)
+
+        server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+        server.starttls()
+        server.login(self.username, self.password)
+        server.sendmail(self.username, recipients, msg.as_string())
+        server.quit()
