@@ -126,6 +126,27 @@
                   default = [ "#C9D6DF" "#F8F3D4" "#FFE2E2" "#E7D4B5" "#AEDEFC" "#EAFFD0" "#FFD3B4" "#BAC7A7" "#95E1D3" "#FCE38A" "#FFB4B4" ];
                   description = "The list of background colors to be used for menu images. Defaults to the upstream-provided colors.";
                 };
+                SMTP_HOST = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Target server address for the SMTP";
+                };
+                SMTP_PORT = lib.mkOption {
+                  type = lib.types.port;
+                  default = 587;
+                  description = "Target server port for the SMPT. Defaults to 587.";
+                };
+                SMTP_USERNAME = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Username for SMTP connection.";
+                };
+                SMTP_PASSWORD = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Password for SMPT connection.";
+                };
+                MAILING_LIST_ADDRESS = lib.mkOption {
+                  type = lib.types.str;
+                  description = "Mailing list address for delivering menu to.";
+                };
             };
           };
           default = { };
