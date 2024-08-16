@@ -246,6 +246,28 @@ class MenuImageGenerator:
 class Helper:
 
     @staticmethod
+    def update_database(database_path: str, menu_list: dict) -> None:
+        """
+        Updates the database with new menu information.
+
+        Args:
+            database_path (str): The path to the database file where the menu data
+                is stored.
+            menu_list (dict): A dictionary containing the new menu data to be
+                added or updated in the database. The dictionary keys are dates,
+                and the values are dictionaries with menu details for those dates.
+
+        Returns:
+            None: This method does not return any value. It modifies the database file
+                in place by updating it with the provided menu information.
+        """
+        with open(database_path, "r+") as file:
+            database_dict = json.load(file)
+            database_dict.update(menu_list)
+            file.seek(0)
+            json.dump(database_dict, file, ensure_ascii=False)
+
+    @staticmethod
     def get_menu(database_path: str, date: str) -> dict:
         """
         Retrieves the menu for a given date from the database.

@@ -143,18 +143,16 @@ async def err_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> Non
 # Jobs
 async def update_db(context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
-        all_menus = await menu_scraper.scrape()
-
-        with open(DB, 'w', encoding="utf-8") as file:
-            json.dump(all_menus, file, ensure_ascii=False)
-            logger.info("Database has been updated!")
+        new_menu_list = await menu_scraper.scrape()
+        Helper.update_database(database_path=DB, menu_list=new_menu_list)
+        logger.info("Database has been updated!")
     except ClientConnectorError:
         message = f"Connection Error, can't reach to SKSDB"
         logger.exception(message)
         await context.bot.send_message(chat_id=LOGGER_CHAT_ID, text=message)
         context.application.job_queue.run_once(update_db, 3600)
     except:
-        message = f"Undefined Error while connecting to the SKSDB"
+        message = f"Undefined Error while updating the database"
         logger.exception(message)
         await context.bot.send_message(chat_id=LOGGER_CHAT_ID, text=f"{message}\n\n{traceback.format_exc()}")
 
