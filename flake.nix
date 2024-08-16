@@ -113,12 +113,12 @@
                 };
                 PORT = lib.mkOption {
                   type = lib.types.port;
-                  default = 48879;
-                  description = "Port to listen the webhook on. Defaults to 48879.";
+                  default = 51413;
+                  description = "Port to listen the webhook on. Defaults to 51413.";
                 };
                 WEBHOOK_URL = lib.mkOption {
                   type = lib.types.str;
-                  default = "https://${cfg.hostname}/${cfg.settings.TELEGRAM_API_KEY}";
+                  default = "https://${cfg.hostname}";
                   description = "The URL for the webhook. Defaults to hostname + api key.";
                 };
                 BACKGROUND_COLORS = lib.mkOption {
