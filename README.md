@@ -16,7 +16,7 @@ apps to use such a simple tool. You can directly use it via Telegram.
 | **🤖 Telegram Bot**     | Directly interact with the Hacettepe Cafeteria Bot | [🌐](https://t.me/HacettepeYemekhaneciBot)                                                  |
 | **📢 Telegram Channel** | Get the updates with image only                    | [🌐](https://t.me/hacettepeyemekhane)                                                       |
 | **📢 Telegram Channel** | Get the updates with text only                     | [🌐](https://t.me/hacettepeyemekhaneText)                                                   |
-| **📧 Mailing List**     | Subscribe to receive updates via email             | [🌐](mailto:hacettepe-cafetaria-list+subscribe@ozguryazilimhacettepe.com?subject=Subscribe) |
+| **📧 Mailing List**     | Subscribe to receive updates via email             | [🌐](mailto:hacettepe-cafeteria+request@lists.tlkg.org.tr?subject=subscribe) |
 
 # 🦾 How To Contribute?
 Hacettepe Cafeteria Bot is an uncomplicated tool with a straightforward aim. Only thing that makes it really useful is the
