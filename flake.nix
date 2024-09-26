@@ -16,7 +16,7 @@
 
       hu-cafeteria-bot = pkgs.stdenv.mkDerivation {
         pname = "hu-cafeteria-bot";
-        version = "2.2.0";
+        version = "2.3";
         src = ./.;
 
         buildInputs = with pkgs; [
@@ -171,7 +171,7 @@
         systemd.services.hu-cafeteria-bot = {
           enable = true;
           wantedBy = [ "multi-user.target" ];
-          after = [ "network.target" ];
+          after = [ "network-online.target" ];
           startLimitBurst = 3;
           startLimitIntervalSec = 60;
 
