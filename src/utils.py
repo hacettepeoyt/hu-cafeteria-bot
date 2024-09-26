@@ -7,6 +7,7 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from io import BytesIO
+from tempfile import NamedTemporaryFile
 
 import aiohttp
 from PIL import Image, ImageDraw, ImageFont
@@ -248,7 +249,9 @@ class Helper:
     @staticmethod
     def update_database(database_path: str, menu_list: dict) -> None:
         """
-        Updates the database with new menu information.
+        Updates the database with new menu information. First, writes into a
+        temporary file inside the directory of database file. Then, replaces
+        database file with this tempfile.
 
         Args:
             database_path (str): The path to the database file where the menu data
@@ -261,11 +264,16 @@ class Helper:
             None: This method does not return any value. It modifies the database file
                 in place by updating it with the provided menu information.
         """
-        with open(database_path, "r+") as file:
+        with open(database_path, "r") as file:
             database_dict = json.load(file)
-            database_dict.update(menu_list)
-            file.seek(0)
-            json.dump(database_dict, file, ensure_ascii=False)
+
+        database_dict.update(menu_list)
+
+        with NamedTemporaryFile("w", delete=False, dir=os.path.dirname(database_path)) as temp_file:
+            json.dump(database_dict, temp_file, ensure_ascii=False)
+            temp_file.flush()
+
+        os.replace(temp_file.name, database_path)
 
     @staticmethod
     def get_menu(database_path: str, date: str) -> dict:
