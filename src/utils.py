@@ -39,7 +39,7 @@ class HacettepeMenuScraper:
                 descriptions) and 'calorie' (calorie information for the day).
         """
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.url) as resp:
+            async with session.get(self.url, ssl=False) as resp:
                 xml_text = await resp.text()
                 return self._parse_menu(xml_text)
 
